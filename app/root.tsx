@@ -1,5 +1,6 @@
 import {
   isRouteErrorResponse,
+  Link,
   Links,
   Meta,
   Outlet,
@@ -8,6 +9,7 @@ import {
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import { Container, SiteFooter, SiteHeader } from "./components/layout";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -23,6 +25,13 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+/**
+ * Applies the stored theme (falling back to the OS preference) before the
+ * first paint, so a dark-mode visitor never sees a white flash. Must stay
+ * inline and synchronous in <head> for that to hold.
+ */
+const themeScript = `(function(){try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.classList.toggle("dark",t==="dark")}catch(e){}})();`;
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -31,8 +40,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>
+      <body className="min-h-screen">
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -42,19 +52,33 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <>
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-surface focus:px-4 focus:py-2"
+      >
+        Skip to content
+      </a>
+      <SiteHeader />
+      <main id="main">
+        <Outlet />
+      </main>
+      <SiteFooter />
+    </>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
+  let message = "Something went wrong";
   let details = "An unexpected error occurred.";
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
+    message = error.status === 404 ? "Page not found" : "Error";
     details =
       error.status === 404
-        ? "The requested page could not be found."
+        ? "That page doesn't exist — it may have moved or never been here."
         : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
@@ -62,14 +86,20 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
+    <Container className="py-24">
+      <h1 className="text-3xl font-semibold tracking-tight">{message}</h1>
+      <p className="mt-3 text-muted">{details}</p>
+      <Link
+        to="/"
+        className="mt-8 inline-block rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-on-accent transition hover:bg-accent-hover"
+      >
+        Back home
+      </Link>
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
+        <pre className="mt-8 w-full overflow-x-auto rounded-lg bg-surface-2 p-4 text-xs">
           <code>{stack}</code>
         </pre>
       )}
-    </main>
+    </Container>
   );
 }

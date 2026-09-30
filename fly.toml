@@ -1,0 +1,20 @@
+# fly.io config. Create the app with `fly launch --no-deploy` (or `fly apps
+# create tyler-greenwood`) and change `app` below if that name is taken.
+app = "tyler-greenwood"
+primary_region = "sea"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Static files with no state: it is safe to stop the machine when idle and
+  # start it again on the next request. This is what keeps the bill near zero.
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

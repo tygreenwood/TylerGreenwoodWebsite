@@ -1,22 +1,16 @@
-FROM node:24-alpine AS development-dependencies-env
-COPY . /app
+# --- build the static site -------------------------------------------------
+FROM node:22-alpine AS build
 WORKDIR /app
+
+COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:24-alpine AS production-dependencies-env
-COPY ./package.json package-lock.json /app/
-WORKDIR /app
-RUN npm ci --omit=dev
-
-FROM node:24-alpine AS build-env
-COPY . /app/
-COPY --from=development-dependencies-env /app/node_modules /app/node_modules
-WORKDIR /app
+COPY . .
 RUN npm run build
 
-FROM node:24-alpine
-COPY ./package.json package-lock.json /app/
-COPY --from=production-dependencies-env /app/node_modules /app/node_modules
-COPY --from=build-env /app/build /app/build
-WORKDIR /app
-CMD ["npm", "run", "start"]
+# --- serve it ---------------------------------------------------------------
+# Only build/client ships: there is no server at runtime, just static files.
+FROM nginx:1.27-alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/build/client /usr/share/nginx/html
+EXPOSE 8080

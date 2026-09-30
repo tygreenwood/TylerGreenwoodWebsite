@@ -3,14 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "react-router build",
     "dev": "react-router dev",
-    "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "build": "react-router build",
+    "preview": "vite preview",
+    "typecheck": "react-router typegen && tsc",
+    "check:contrast": "node scripts/check-contrast.mjs"
   },
   "dependencies": {
     "@react-router/node": "^8.4.0",
-    "@react-router/serve": "^8.4.0",
     "isbot": "^5.1.36",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

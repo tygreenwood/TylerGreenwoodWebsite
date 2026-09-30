@@ -1,4 +1,7 @@
-.react-router
-build
+.git
+.github
 node_modules
-README.md
+build
+.react-router
+.agents
+*.md
