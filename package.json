@@ -2,12 +2,17 @@
   "name": "tyler-greenwood-website",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11"
+  },
   "scripts": {
     "dev": "react-router dev",
     "build": "react-router build",
     "preview": "vite preview",
     "typecheck": "react-router typegen && tsc",
-    "check:contrast": "node scripts/check-contrast.mjs"
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "deploy": "fly deploy --remote-only --ha=false"
   },
   "dependencies": {
     "@react-router/node": "^8.4.0",
@@ -19,7 +24,7 @@
   "devDependencies": {
     "@react-router/dev": "^8.4.0",
     "@tailwindcss/vite": "^4.2.2",
-    "@types/node": "^22",
+    "@types/node": "^24",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "tailwindcss": "^4.2.2",

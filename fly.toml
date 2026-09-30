@@ -1,10 +1,14 @@
-# fly.io config. Create the app with `fly launch --no-deploy` (or `fly apps
-# create tyler-greenwood`) and change `app` below if that name is taken.
+# fly.io config. Create the app with `fly apps create tyler-greenwood` (not
+# `fly launch`, which rewrites this file) and change `app` below if that name
+# is taken. Deploy with `npm run deploy`.
 app = "tyler-greenwood"
-primary_region = "sea"
+primary_region = "sjc"
 
 [build]
   dockerfile = "Dockerfile"
+
+[deploy]
+  strategy = "rolling"
 
 [http_service]
   internal_port = 8080

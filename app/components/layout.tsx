@@ -1,11 +1,16 @@
-import { NavLink } from "react-router";
-import { site } from "../content";
+import { useEffect, useState } from "react";
+import { projects, site } from "../content";
 import { ThemeToggle } from "./theme-toggle";
 
-const navItems = [
-  { to: "/", label: "Home" },
-  { to: "/projects", label: "Projects" },
-  { to: "/about", label: "About" },
+/**
+ * The home page's sections, in scroll order. Projects stays out of the nav
+ * (and off the page) until `projects` in content.ts has an entry.
+ */
+export const sections = [
+  { id: "about", label: "About" },
+  { id: "experience", label: "Experience" },
+  ...(projects.length > 0 ? [{ id: "projects", label: "Projects" }] : []),
+  { id: "contact", label: "Contact" },
 ];
 
 export function Container({
@@ -16,38 +21,92 @@ export function Container({
   className?: string;
 }) {
   return (
-    <div className={`mx-auto w-full max-w-3xl px-5 sm:px-6 ${className}`}>{children}</div>
+    <div className={`mx-auto w-full max-w-6xl px-5 sm:px-8 ${className}`}>{children}</div>
   );
 }
 
-export function SiteHeader() {
-  return (
-    <header className="sticky top-0 z-20 border-b border-border/70 bg-bg/85 backdrop-blur">
-      <Container className="flex h-16 items-center justify-between gap-4">
-        <NavLink to="/" className="font-semibold tracking-tight">
-          {site.name}
-        </NavLink>
+/**
+ * Tracks whether the page has left the very top (to give the header a
+ * backdrop) and which section is under the upper part of the viewport.
+ */
+function useScrollState() {
+  const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState<string | null>(null);
 
-        <div className="flex items-center gap-1 sm:gap-2">
-          <nav aria-label="Main">
-            <ul className="flex items-center gap-1">
-              {navItems.map((item) => (
-                <li key={item.to}>
-                  <NavLink
-                    to={item.to}
-                    end={item.to === "/"}
-                    className={({ isActive }) =>
-                      `rounded-full px-3 py-1.5 text-sm transition ${
+  useEffect(() => {
+    let frame = 0;
+
+    function update() {
+      frame = 0;
+      setScrolled(window.scrollY > 8);
+
+      const atBottom =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+      let current: string | null = null;
+      for (const { id } of sections) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        if (atBottom || el.getBoundingClientRect().top <= window.innerHeight * 0.4) {
+          current = id;
+        }
+      }
+      setActive(current);
+    }
+
+    function onScroll() {
+      if (!frame) frame = requestAnimationFrame(update);
+    }
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  return { scrolled, active };
+}
+
+export function SiteHeader() {
+  const { scrolled, active } = useScrollState();
+  const firstName = site.name.split(" ")[0];
+
+  return (
+    <header
+      className={`fixed inset-x-0 top-0 z-20 border-b transition-colors duration-300 ${
+        scrolled ? "border-border/70 bg-bg/85 backdrop-blur" : "border-transparent"
+      }`}
+    >
+      <Container className="flex h-16 items-center justify-between gap-3">
+        <a href="/#top" className="shrink-0 font-semibold tracking-tight">
+          <span className="sm:hidden">{firstName}</span>
+          <span className="hidden sm:inline">{site.name}</span>
+        </a>
+
+        <div className="flex min-w-0 items-center gap-1 sm:gap-2">
+          <nav aria-label="Main" className="min-w-0 overflow-x-auto [scrollbar-width:none]">
+            <ul className="flex items-center gap-0.5 sm:gap-1">
+              {sections.map((section) => {
+                const isActive = active === section.id;
+                return (
+                  <li key={section.id}>
+                    <a
+                      href={`/#${section.id}`}
+                      aria-current={isActive ? "location" : undefined}
+                      className={`block whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm transition sm:px-3 ${
                         isActive
                           ? "bg-accent-soft text-text"
                           : "text-muted hover:bg-surface-2 hover:text-text"
-                      }`
-                    }
-                  >
-                    {item.label}
-                  </NavLink>
-                </li>
-              ))}
+                      }`}
+                    >
+                      {section.label}
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
           <ThemeToggle />
@@ -58,6 +117,42 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
+  return (
+    <footer className="border-t border-border/70 bg-bg/80 py-10 backdrop-blur-sm">
+      <Container>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted">
+            © {new Date().getFullYear()} {site.name} · {site.location}
+          </p>
+          <SocialLinks />
+        </div>
+
+        {/* Inline links, so they're underlined rather than told apart by
+            colour alone. */}
+        <p className="mt-6 border-t border-border/70 pt-6 text-xs leading-relaxed text-muted">
+          Built with React Router, Tailwind, and a hand-written WebGL shader.
+          Hosted on{" "}
+          <a
+            href={site.host.url}
+            className="underline decoration-border-strong underline-offset-4 transition hover:text-accent hover:decoration-accent"
+          >
+            {site.host.name}
+          </a>
+          . The code is open —{" "}
+          <a
+            href={site.source}
+            className="underline decoration-border-strong underline-offset-4 transition hover:text-accent hover:decoration-accent"
+          >
+            view the source on GitHub
+          </a>
+          .
+        </p>
+      </Container>
+    </footer>
+  );
+}
+
+export function SocialLinks({ className = "" }: { className?: string }) {
   const links = [
     site.github && { href: site.github, label: "GitHub" },
     site.linkedin && { href: site.linkedin, label: "LinkedIn" },
@@ -66,40 +161,52 @@ export function SiteFooter() {
   ].filter((link): link is { href: string; label: string } => Boolean(link));
 
   return (
-    <footer className="mt-24 border-t border-border/70 py-10">
-      <Container className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted">
-          © {new Date().getFullYear()} {site.name} · {site.location}
-        </p>
-        <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-          {links.map((link) => (
-            <li key={link.label}>
-              <a
-                href={link.href}
-                className="text-muted underline-offset-4 transition hover:text-accent hover:underline"
-              >
-                {link.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </Container>
-    </footer>
+    <ul className={`flex flex-wrap gap-x-5 gap-y-2 text-sm ${className}`}>
+      {links.map((link) => (
+        <li key={link.label}>
+          <a
+            href={link.href}
+            className="text-muted underline-offset-4 transition hover:text-accent hover:underline"
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
   );
 }
 
-/** Page title + optional lede, shared by the Projects and About pages. */
-export function PageHeading({
+/** One band of the home page: an anchor target with a titled heading. */
+export function Section({
+  id,
   title,
-  lede,
+  children,
 }: {
+  id: string;
   title: string;
-  lede?: string;
+  children: React.ReactNode;
 }) {
   return (
-    <div className="border-b border-border/70 pb-8">
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h1>
-      {lede && <p className="mt-3 max-w-prose text-muted">{lede}</p>}
-    </div>
+    <section id={id} aria-labelledby={`${id}-heading`} className="scroll-mt-16 py-20 sm:py-28">
+      <Container>
+        <div className="max-w-3xl">
+          <h2
+            id={`${id}-heading`}
+            className="flex items-center gap-5 text-2xl font-semibold tracking-tight sm:text-3xl"
+          >
+            {title}
+            <span aria-hidden="true" className="h-px flex-1 bg-gradient-to-r from-accent/60 to-transparent" />
+          </h2>
+          <div className="mt-10">{children}</div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/** Small uppercase label for a sub-part of a section. */
+export function SubHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-sm font-medium uppercase tracking-[0.14em] text-muted">{children}</h3>
   );
 }

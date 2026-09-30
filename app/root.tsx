@@ -10,6 +10,7 @@ import {
 
 import type { Route } from "./+types/root";
 import { Container, SiteFooter, SiteHeader } from "./components/layout";
+import { OrbitBackground } from "./components/orbit-background";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -34,7 +35,7 @@ const themeScript = `(function(){try{var t=localStorage.getItem("theme");if(t!==
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -60,6 +61,7 @@ export default function App() {
       >
         Skip to content
       </a>
+      <OrbitBackground />
       <SiteHeader />
       <main id="main">
         <Outlet />

@@ -1,5 +1,5 @@
 /**
- * All site copy lives here. Edit this file to update the site — the route
+ * All site copy lives here. Edit this file to update the site — the page
  * components read from it and nothing else hard-codes text.
  */
 
@@ -20,7 +20,7 @@ export type Project = {
   image?: string;
   /** Free text: "2025", "2024 — present", etc. */
   period?: string;
-  /** Pulled out and shown first on the projects page. */
+  /** Shown first in the Projects section. */
   featured?: boolean;
 };
 
@@ -47,6 +47,9 @@ export const site = {
   github: "https://github.com/tygreenwood",
   linkedin: "https://www.linkedin.com/in/tyler-greenwood-pdx/",
   resume: "", // e.g. "/resume.pdf" — leave "" to hide the résumé link
+  // Credited in the footer's "about this site" line.
+  source: "https://github.com/tygreenwood/TylerGreenwoodWebsite",
+  host: { name: "Fly.io", url: "https://fly.io" },
 };
 
 export const home = {
@@ -54,29 +57,16 @@ export const home = {
   headline: "I build web software that people use every day.",
   intro:
     "Software engineer in Seattle. I've shipped front ends for a national car-buying platform and a university college of engineering, prototyped IoT alert systems end to end, and lately I build internal tools that take tedious work off engineers' desks. I care about the details that make software still pleasant a year after it ships.",
-  // Shown as a short "what I work with" strip on the home page. The full,
-  // grouped list lives in `about.skills`.
-  skills: [
-    "TypeScript",
-    "React",
-    "Python",
-    "Node.js",
-    "Rust",
-    "Linux",
-    "Vector Databases",
-    "Accessibility (WCAG)",
-  ],
 };
 
 export const about = {
   // Each string is its own paragraph.
   paragraphs: [
-    "I'm a software engineer in Seattle, with a B.S. and a Master of Engineering in Computer Science from Oregon State University. I got into this work because I like taking something tangled and leaving it simpler than I found it — which, most days, is what engineering actually is.",
-    "Most of what I've built lives on the web. I owned the React account pages on driveway.com, led a redesign of Oregon State's degree pages that lifted engagement over 73%, and implemented a design system from scratch alongside the College of Engineering's lead designer. Accessibility isn't a late pass for me — I hold new components to WCAG AA and push toward AAA where the design allows.",
-    "Lately I've been contracting on internal tooling, which turns out to be my favourite kind of problem: at Altitude Aerospace I built an AI search over a vector database of PDF embeddings so engineers can find prior certification work instead of recreating it, and automated the document-release pipeline that used to be somebody's full-time job.",
-    "Away from a keyboard I train judo, which has taught me more about debugging under pressure than any class did — you get thrown, you get up, you figure out what you did wrong. The rest of my weekends usually involve a pack and whatever Cascades trail is melted out.",
+    "I'm a software engineer in Seattle, with a B.S. and a Master of Engineering in Computer Science from Oregon State University. I've been writing code almost as long as I can remember, and I was drawn to computer science and software engineering because I like using these powerful machines to solve problems and automate solutions.",
+    "Most of what I've built lives on the web. I owned the React account pages on driveway.com, led a redesign of Oregon State's degree pages that lifted engagement over 73%, and implemented a design system from scratch alongside the College of Engineering's lead designer. My emphasis on accessibility and scalability has allowed our team to ship features with a higher level of quality and efficiency than ever before.",
+    "Lately I've also been contracting on internal tooling, which has pushed me to ship useful automations extremely quickly. At Altitude Aerospace I built an AI search over a vector database of PDF embeddings so engineers can find prior certification work instead of recreating it, and automated the document-release pipeline that used to require a fully staffed position.",
   ],
-  // Grouped skills, rendered as a definition list on the About page.
+  // Grouped skills, rendered as a definition list in the About section.
   skills: [
     {
       label: "Languages",
@@ -115,12 +105,12 @@ export const about = {
       ],
     },
   ],
-  // Photos on the About page. Drop the matching files into public/images/.
+  // Photos in the About section. Drop the matching files into public/images/.
   photos: [
     {
       src: "/images/judo.jpg",
       alt: "Tyler executing a throw during a judo competition",
-      caption: "Judo — a competition throw.",
+      caption: "Kata Guruma: a judo throw.",
     },
     {
       src: "/images/backpacking.jpg",
@@ -274,6 +264,7 @@ export const timeline: TimelineEntry[] = [
 ];
 
 export const projects: Project[] = [
-  // TODO: replace these with real projects. The page and cards are already
-  // wired up — adding an entry here is all it takes to add a project.
+  // TODO: replace these with real projects. The section and cards are already
+  // wired up — the Projects section and its nav link appear as soon as there's
+  // an entry here.
 ];
